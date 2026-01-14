@@ -338,7 +338,7 @@ class ReceiptParser:
         receipt = Receipt(
             date=ai_data.date,
             merchant=ai_data.merchant,
-            currency="EUR"  # Default, could be enhanced to detect from AI data
+            currency=ai_data.currency if hasattr(ai_data, 'currency') else "EUR"
         )
         
         # Convert products

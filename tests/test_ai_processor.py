@@ -4,10 +4,6 @@ Tests for AI-powered receipt processing
 import unittest
 from unittest.mock import Mock, patch, MagicMock
 import os
-import sys
-
-# Add parent directory to path to import modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ai_processor import AIProcessor, AIExtractedData
 from receipt_parser import ReceiptParser

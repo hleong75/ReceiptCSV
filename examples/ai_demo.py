@@ -3,12 +3,15 @@ Example demonstrating AI-powered receipt processing
 
 This script shows how to use the AI processor to handle
 noisy OCR output and extract structured data intelligently.
+
+Note: Run from the repository root: python examples/ai_demo.py
 """
 
 import sys
 import os
 
-# Add parent directory to path
+# Add parent directory to path (needed when running from examples/ subdirectory)
+# In production, install the package properly instead
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from receipt_parser import ReceiptParser

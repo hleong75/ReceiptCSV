@@ -16,6 +16,7 @@ class AIExtractedData:
     merchant: str = ""
     date: str = ""
     total: float = 0.0
+    currency: str = "EUR"
     confidence: float = 0.0
     
     def __post_init__(self):
@@ -304,6 +305,7 @@ Rules:
                 merchant=data.get('merchant', ''),
                 date=data.get('date', ''),
                 total=data.get('total', 0.0),
+                currency=data.get('currency', 'EUR'),
                 confidence=0.8  # Default confidence for successful extraction
             )
         except json.JSONDecodeError as e:
