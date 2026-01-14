@@ -3,16 +3,20 @@ AI Processor - Intelligent post-OCR data extraction using AI
 """
 import re
 import os
-from typing import List, Dict, Optional, Tuple
+import logging
+from typing import List, Dict, Optional, Tuple, Any
 from dataclasses import dataclass
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class AIExtractedData:
     """Represents data extracted by AI from receipt text"""
-    products: List[Dict[str, any]] = None
-    discounts: List[Dict[str, any]] = None
-    payments: List[Dict[str, any]] = None
+    products: List[Dict[str, Any]] = None
+    discounts: List[Dict[str, Any]] = None
+    payments: List[Dict[str, Any]] = None
     merchant: str = ""
     date: str = ""
     total: float = 0.0
@@ -105,10 +109,10 @@ class AIProcessor:
             
         except Exception as e:
             # If AI fails, return None (will fallback to traditional parsing)
-            print(f"AI processing failed: {e}")
+            logger.warning(f"AI processing failed: {e}")
             return None
     
-    def enhance_product_detection(self, line: str, context: List[str]) -> Optional[Dict[str, any]]:
+    def enhance_product_detection(self, line: str, context: List[str]) -> Optional[Dict[str, Any]]:
         """
         Use AI to enhance product detection from a single line
         
@@ -158,7 +162,7 @@ If no product is found, set has_product to false."""
             return None
             
         except Exception as e:
-            print(f"AI product detection failed: {e}")
+            logger.debug(f"AI product detection failed: {e}")
             return None
     
     def identify_discount_type(self, text: str) -> Optional[str]:
@@ -197,7 +201,7 @@ Return JSON with key "discount_type" containing a single word or short phrase.""
             return result.get('discount_type', None)
             
         except Exception as e:
-            print(f"AI discount type identification failed: {e}")
+            logger.debug(f"AI discount type identification failed: {e}")
             return None
     
     def extract_price_from_noisy_text(self, text: str) -> Optional[float]:
@@ -245,7 +249,7 @@ If no price found, return {{"price": null}}."""
             return None
             
         except Exception as e:
-            print(f"AI price extraction failed: {e}")
+            logger.debug(f"AI price extraction failed: {e}")
             return None
     
     def _create_extraction_prompt(self, text: str) -> str:
@@ -309,5 +313,5 @@ Rules:
                 confidence=0.8  # Default confidence for successful extraction
             )
         except json.JSONDecodeError as e:
-            print(f"Failed to parse AI response: {e}")
+            logger.error(f"Failed to parse AI response: {e}")
             return AIExtractedData(confidence=0.0)
