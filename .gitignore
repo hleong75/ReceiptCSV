@@ -51,3 +51,10 @@ coverage.xml
 # Output files
 *.csv
 output/
+
+# API Keys and secrets
+.env
+.env.local
+*.key
+secrets.txt
+config/secrets.*
