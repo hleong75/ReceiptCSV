@@ -24,6 +24,7 @@ class PDFExtractor:
         """
         try:
             from pypdf import PdfReader
+            from pypdf.errors import PdfReadError
         except ImportError:
             raise ImportError(
                 "pypdf is required for PDF support. "
@@ -42,5 +43,8 @@ class PDFExtractor:
             
             return '\n'.join(text_parts)
         
-        except Exception as e:
+        except (PdfReadError, FileNotFoundError, PermissionError) as e:
             raise ValueError(f"Failed to extract text from PDF: {e}")
+        except Exception as e:
+            # Catch any other unexpected errors
+            raise ValueError(f"Unexpected error while extracting PDF: {e}")

@@ -145,20 +145,26 @@ Paiement: Apple Pay    12.98
 class TestPDFExtraction(unittest.TestCase):
     """Test PDF extraction functionality"""
     
-    def test_pdf_extractor_import(self):
-        """Test that PDFExtractor can be imported"""
+    def setUp(self):
+        """Set up test fixtures"""
+        # Try to import PDF extractor
         try:
             from pdf_extractor import PDFExtractor
-            extractor = PDFExtractor()
-            self.assertIsNotNone(extractor)
+            self.extractor = PDFExtractor()
+            self.pdf_available = True
         except ImportError:
+            self.pdf_available = False
+    
+    def test_pdf_extractor_import(self):
+        """Test that PDFExtractor can be imported"""
+        if not self.pdf_available:
             self.skipTest("pypdf not installed")
+        
+        self.assertIsNotNone(self.extractor)
     
     def test_pdf_text_extraction(self):
         """Test text extraction from PDF"""
-        try:
-            from pdf_extractor import PDFExtractor
-        except ImportError:
+        if not self.pdf_available:
             self.skipTest("pypdf not installed")
         
         # Test with example PDF if it exists
@@ -166,8 +172,7 @@ class TestPDFExtraction(unittest.TestCase):
         if not pdf_path.exists():
             self.skipTest("Example PDF not found")
         
-        extractor = PDFExtractor()
-        text = extractor.extract_text(pdf_path)
+        text = self.extractor.extract_text(pdf_path)
         
         # Verify that text was extracted
         self.assertIsNotNone(text)
@@ -176,9 +181,7 @@ class TestPDFExtraction(unittest.TestCase):
     
     def test_pdf_full_pipeline(self):
         """Test full pipeline with PDF input"""
-        try:
-            from pdf_extractor import PDFExtractor
-        except ImportError:
+        if not self.pdf_available:
             self.skipTest("pypdf not installed")
         
         # Test with example PDF if it exists
@@ -187,8 +190,7 @@ class TestPDFExtraction(unittest.TestCase):
             self.skipTest("Example PDF not found")
         
         # Extract text from PDF
-        extractor = PDFExtractor()
-        text = extractor.extract_text(pdf_path)
+        text = self.extractor.extract_text(pdf_path)
         
         # Parse and generate CSV
         parser = ReceiptParser()
