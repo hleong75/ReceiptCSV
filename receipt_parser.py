@@ -83,15 +83,7 @@ class ReceiptParser:
                     i += 1
                     continue
             
-            # Try to extract payment method (check before discount)
-            if self._is_payment_line(line):
-                method, amount = self._extract_payment(line)
-                if method:
-                    receipt.payment_methods.append((method, amount))
-                i += 1
-                continue
-            
-            # Try to extract discount (check before product)
+            # Try to extract discount (check before payment - more specific)
             discount = self._extract_discount(line)
             if discount:
                 discount_type, amount = discount
@@ -110,6 +102,14 @@ class ReceiptParser:
                         last_product.discount_amount = amount
                 else:
                     receipt.global_discounts.append((discount_type, amount))
+                i += 1
+                continue
+            
+            # Try to extract payment method (check after discount)
+            if self._is_payment_line(line):
+                method, amount = self._extract_payment(line)
+                if method:
+                    receipt.payment_methods.append((method, amount))
                 i += 1
                 continue
             
@@ -250,7 +250,12 @@ class ReceiptParser:
         if not any(keyword in line.lower() for keyword in discount_keywords):
             return None
         
-        # Extract amount (handle negative sign)
+        # Extract amount (must have negative sign for discounts)
+        # Check for negative sign first
+        has_negative = '-' in line
+        if not has_negative:
+            return None  # Discounts must be negative
+        
         prices = re.findall(r'-?\s*(\d+)[.,](\d{2})', line)
         if not prices:
             return None
