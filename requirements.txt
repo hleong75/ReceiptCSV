@@ -1,7 +1,5 @@
 # No external dependencies required for basic functionality
 # Python standard library only
 
-# Optional dependencies for PDF support (not yet implemented)
-# pypdf2>=3.0.0
-# pytesseract>=0.3.10
-# pdf2image>=1.16.3
+# Optional dependency for PDF support
+pypdf>=3.0.0

@@ -36,7 +36,7 @@ def main():
     arg_parser.add_argument(
         'input',
         nargs='?',
-        help='Input file containing receipt text (stdin if not provided)'
+        help='Input file containing receipt text or PDF (stdin if not provided)'
     )
     arg_parser.add_argument(
         '-o', '--output',
@@ -51,7 +51,22 @@ def main():
         if not input_path.exists():
             print(f"Error: Input file '{args.input}' not found", file=sys.stderr)
             sys.exit(1)
-        text = input_path.read_text(encoding='utf-8')
+        
+        # Check if input is a PDF file
+        if input_path.suffix.lower() == '.pdf':
+            try:
+                from pdf_extractor import PDFExtractor
+                extractor = PDFExtractor()
+                text = extractor.extract_text(input_path)
+            except ImportError as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+            except ValueError as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+        else:
+            # Read as text file
+            text = input_path.read_text(encoding='utf-8')
     else:
         # Read from stdin
         text = sys.stdin.read()

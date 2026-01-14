@@ -2,6 +2,7 @@
 Tests for receipt CSV extraction
 """
 import unittest
+from pathlib import Path
 from receipt_parser import ReceiptParser, Product
 from csv_generator import CSVGenerator
 
@@ -138,6 +139,68 @@ Paiement: Apple Pay    12.98
         self.assertIn("Date d'achat", lines[0])
         
         # Verify data row exists
+        self.assertIn("2024-03-15", lines[1])
+
+
+class TestPDFExtraction(unittest.TestCase):
+    """Test PDF extraction functionality"""
+    
+    def test_pdf_extractor_import(self):
+        """Test that PDFExtractor can be imported"""
+        try:
+            from pdf_extractor import PDFExtractor
+            extractor = PDFExtractor()
+            self.assertIsNotNone(extractor)
+        except ImportError:
+            self.skipTest("pypdf not installed")
+    
+    def test_pdf_text_extraction(self):
+        """Test text extraction from PDF"""
+        try:
+            from pdf_extractor import PDFExtractor
+        except ImportError:
+            self.skipTest("pypdf not installed")
+        
+        # Test with example PDF if it exists
+        pdf_path = Path("examples/receipt1.pdf")
+        if not pdf_path.exists():
+            self.skipTest("Example PDF not found")
+        
+        extractor = PDFExtractor()
+        text = extractor.extract_text(pdf_path)
+        
+        # Verify that text was extracted
+        self.assertIsNotNone(text)
+        self.assertTrue(len(text) > 0)
+        self.assertIn("2024-03-15", text)
+    
+    def test_pdf_full_pipeline(self):
+        """Test full pipeline with PDF input"""
+        try:
+            from pdf_extractor import PDFExtractor
+        except ImportError:
+            self.skipTest("pypdf not installed")
+        
+        # Test with example PDF if it exists
+        pdf_path = Path("examples/receipt1.pdf")
+        if not pdf_path.exists():
+            self.skipTest("Example PDF not found")
+        
+        # Extract text from PDF
+        extractor = PDFExtractor()
+        text = extractor.extract_text(pdf_path)
+        
+        # Parse and generate CSV
+        parser = ReceiptParser()
+        generator = CSVGenerator()
+        
+        receipt = parser.parse(text)
+        csv_output = generator.generate(receipt)
+        
+        # Verify output
+        lines = csv_output.strip().split('\n')
+        self.assertTrue(len(lines) >= 2)  # At least header + 1 product
+        self.assertIn("Date d'achat", lines[0])
         self.assertIn("2024-03-15", lines[1])
 
 
