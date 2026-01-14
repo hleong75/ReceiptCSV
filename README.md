@@ -13,6 +13,7 @@ ReceiptCSV extrait les données structurées des reçus (texte, PDF ou OCR) et g
 - ✅ Gestion des réductions appliquées
 - ✅ Répartition proportionnelle pour plusieurs moyens de paiement
 - ✅ Répartition proportionnelle des réductions globales
+- ✅ Support des fichiers PDF
 - ✅ Format CSV avec séparateur point-virgule (;)
 - ✅ Format de date YYYY-MM-DD
 - ✅ Montants numériques avec point (.) comme séparateur décimal
@@ -20,15 +21,12 @@ ReceiptCSV extrait les données structurées des reçus (texte, PDF ou OCR) et g
 ## Colonnes du CSV
 
 1. Date d'achat
-2. Nom de l'application / marchand
-3. Nom du produit
-4. Quantité
-5. Prix unitaire
-6. Sous-total produit
-7. Type de réduction
-8. Montant de la réduction
-9. Moyen de paiement
-10. Devise
+2. Nom du produit
+3. Prix
+4. Remise
+5. Prix Total
+6. Moyen de paiement
+7. Devise
 
 ## Installation
 
@@ -37,7 +35,8 @@ ReceiptCSV extrait les données structurées des reçus (texte, PDF ou OCR) et g
 git clone https://github.com/hleong75/ReceiptCSV.git
 cd ReceiptCSV
 
-# Aucune dépendance externe requise (Python 3.6+)
+# Pour le support PDF, installer les dépendances
+pip install -r requirements.txt
 ```
 
 ## Utilisation
@@ -45,14 +44,18 @@ cd ReceiptCSV
 ### En ligne de commande
 
 ```bash
-# Depuis un fichier
+# Depuis un fichier texte
 python receipt_csv.py examples/receipt1.txt
+
+# Depuis un fichier PDF
+python receipt_csv.py examples/receipt1.pdf
 
 # Depuis stdin
 cat examples/receipt1.txt | python receipt_csv.py
 
 # Sauvegarder dans un fichier
 python receipt_csv.py examples/receipt1.txt -o output.csv
+python receipt_csv.py examples/receipt1.pdf -o output.csv
 
 # Afficher l'aide
 python receipt_csv.py --help
@@ -64,7 +67,7 @@ python receipt_csv.py --help
 from receipt_parser import ReceiptParser
 from csv_generator import CSVGenerator
 
-# Charger le reçu
+# Charger le reçu texte
 with open('receipt.txt', 'r') as f:
     receipt_text = f.read()
 
@@ -76,6 +79,29 @@ receipt = parser.parse(receipt_text)
 csv_output = generator.generate(receipt)
 
 # Sauvegarder ou afficher
+print(csv_output)
+```
+
+### Utilisation avec PDF
+
+```python
+from pathlib import Path
+from pdf_extractor import PDFExtractor
+from receipt_parser import ReceiptParser
+from csv_generator import CSVGenerator
+
+# Extraire le texte depuis un PDF
+pdf_path = Path('receipt.pdf')
+extractor = PDFExtractor()
+receipt_text = extractor.extract_text(pdf_path)
+
+# Parser et générer le CSV
+parser = ReceiptParser()
+generator = CSVGenerator()
+
+receipt = parser.parse(receipt_text)
+csv_output = generator.generate(receipt)
+
 print(csv_output)
 ```
 
@@ -106,9 +132,9 @@ Paiement: Apple Pay    10.98
 
 **Sortie CSV:**
 ```csv
-Date d'achat;Nom de l'application / marchand;Nom du produit;Quantité;Prix unitaire;Sous-total produit;Type de réduction;Montant de la réduction;Moyen de paiement;Devise
-2024-03-15;App Store;Application A;1;9.99;9.99;Coupon;2.00;Apple Pay;EUR
-2024-03-15;App Store;Application B;1;2.99;2.99;;;Apple Pay;EUR
+Date d'achat;Nom du produit;Prix;Remise;Prix Total;Moyen de paiement;Devise
+2024-03-15;Application A;9.99;2.00;7.99;Apple Pay;EUR
+2024-03-15;Application B;2.99;;2.99;Apple Pay;EUR
 ```
 
 ## Règles de traitement
@@ -123,8 +149,8 @@ Date d'achat;Nom de l'application / marchand;Nom du produit;Quantité;Prix unita
 ### Limitations connues
 
 1. **Ordre des éléments** : Les réductions sont appliquées au produit précédent. Pour de meilleurs résultats, placez les réductions juste après le produit concerné.
-2. **Format texte uniquement** : Actuellement, seul le format texte est supporté (pas de PDF ni d'images directement).
-3. **Parsing simple** : Le parser utilise des expressions régulières simples. Les formats de reçus très complexes peuvent nécessiter une adaptation.
+2. **Parsing simple** : Le parser utilise des expressions régulières simples. Les formats de reçus très complexes peuvent nécessiter une adaptation.
+3. **Qualité PDF** : Pour les fichiers PDF, la qualité de l'extraction dépend de la qualité du document. Les PDF numérisés (images) ne sont pas supportés sans OCR.
 
 ### Bonnes pratiques
 
@@ -159,13 +185,13 @@ python -m unittest tests/test_receipt_csv.py -v
 ## Exemples de reçus
 
 Le répertoire `examples/` contient plusieurs exemples de reçus :
-- `receipt1.txt` : Reçu simple avec un moyen de paiement
-- `receipt2.txt` : Reçu avec plusieurs moyens de paiement
-- `receipt3.txt` : Reçu avec réductions multiples
+- `receipt1.txt` / `receipt1.pdf` : Reçu simple avec un moyen de paiement
+- `receipt2.txt` / `receipt2.pdf` : Reçu avec plusieurs moyens de paiement
+- `receipt3.txt` / `receipt3.pdf` : Reçu avec réductions multiples
 
 ## Développement futur
 
-- [ ] Support pour les fichiers PDF
+- [x] Support pour les fichiers PDF
 - [ ] Support pour l'OCR d'images
 - [ ] Interface web
 - [ ] API REST
