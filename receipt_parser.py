@@ -2,7 +2,6 @@
 Receipt Parser - Extract structured data from receipts
 """
 import re
-from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
 
@@ -213,16 +212,16 @@ class ReceiptParser:
         """Extract payment method and amount"""
         # Extract amount
         prices = re.findall(r'(\d+)[.,](\d{2})', line)
-        amount = float(f"{prices[-1][0]}.{prices[-1][1]}") if prices else 0.0
+        if not prices:
+            return None, 0.0
+        
+        amount = float(f"{prices[-1][0]}.{prices[-1][1]}")
         
         # Extract method name (everything before the amount)
-        if prices:
-            price_str = f"{prices[-1][0]}{'.' if '.' in line else ','}{prices[-1][1]}"
-            method = line.split(price_str)[0].strip()
-            # Clean up common prefixes
-            method = re.sub(r'^(paiement|payment|payé|paid)\s*[:;]?\s*', '', method, flags=re.IGNORECASE).strip()
-        else:
-            method = line.strip()
+        price_str = f"{prices[-1][0]}{'.' if '.' in line else ','}{prices[-1][1]}"
+        method = line.split(price_str)[0].strip()
+        # Clean up common prefixes
+        method = re.sub(r'^(paiement|payment|payé|paid)\s*[:;]?\s*', '', method, flags=re.IGNORECASE).strip()
         
         return method, amount
     

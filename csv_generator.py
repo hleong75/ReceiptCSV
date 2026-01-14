@@ -101,17 +101,18 @@ class CSVGenerator:
                 product_ratio = product.subtotal / total
                 proportional_discount = total_global_discount * product_ratio
                 
+                # Combine all global discount types
+                global_discount_types = [dtype for dtype, _ in receipt.global_discounts]
+                global_type_str = ", ".join(global_discount_types)
+                
                 if new_product.discount_amount > 0:
                     # Combine with existing discount
                     new_product.discount_amount += proportional_discount
-                    if receipt.global_discounts:
-                        global_type = receipt.global_discounts[0][0]
-                        new_product.discount_type = f"{new_product.discount_type}, {global_type}"
+                    new_product.discount_type = f"{new_product.discount_type}, {global_type_str}"
                 else:
                     # Set global discount
                     new_product.discount_amount = proportional_discount
-                    if receipt.global_discounts:
-                        new_product.discount_type = receipt.global_discounts[0][0]
+                    new_product.discount_type = global_type_str
             
             products.append(new_product)
         
@@ -136,9 +137,13 @@ class CSVGenerator:
         """Format number with . as decimal separator"""
         if value == 0:
             return ""
-        # Remove trailing zeros and unnecessary decimal point
-        formatted = f"{value:.2f}".rstrip('0').rstrip('.')
-        # If it's a whole number, add .0 for clarity, or return as is
-        if '.' not in formatted and value != int(value):
-            formatted = f"{value:.2f}"
+        # Format with 2 decimal places
+        formatted = f"{value:.2f}"
+        # Remove trailing zeros, but keep at least one decimal place if not a whole number
+        if '.' in formatted:
+            # Remove trailing zeros
+            formatted = formatted.rstrip('0')
+            # If all decimals were zeros, keep one zero
+            if formatted.endswith('.'):
+                formatted = formatted[:-1]  # Remove the decimal point for whole numbers
         return formatted
