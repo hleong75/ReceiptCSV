@@ -4,7 +4,7 @@ Un outil d'extraction et de structuration de données à partir de reçus d'appl
 
 ## Description
 
-ReceiptCSV extrait les données structurées des reçus (texte, PDF ou OCR) et génère un fichier CSV avec une ligne par produit acheté.
+ReceiptCSV extrait les données structurées des reçus (texte ou PDF) et génère un fichier CSV avec une ligne par produit acheté.
 
 ## Fonctionnalités
 
@@ -37,7 +37,8 @@ ReceiptCSV extrait les données structurées des reçus (texte, PDF ou OCR) et g
 git clone https://github.com/hleong75/ReceiptCSV.git
 cd ReceiptCSV
 
-# Aucune dépendance externe requise (Python 3.6+)
+# Installer les dépendances pour le support PDF
+pip install -r requirements.txt
 ```
 
 ## Utilisation
@@ -45,14 +46,18 @@ cd ReceiptCSV
 ### En ligne de commande
 
 ```bash
-# Depuis un fichier
+# Depuis un fichier texte
 python receipt_csv.py examples/receipt1.txt
+
+# Depuis un fichier PDF
+python receipt_csv.py examples/receipt1.pdf
 
 # Depuis stdin
 cat examples/receipt1.txt | python receipt_csv.py
 
 # Sauvegarder dans un fichier
 python receipt_csv.py examples/receipt1.txt -o output.csv
+python receipt_csv.py examples/receipt1.pdf -o output.csv
 
 # Afficher l'aide
 python receipt_csv.py --help
@@ -123,8 +128,8 @@ Date d'achat;Nom de l'application / marchand;Nom du produit;Quantité;Prix unita
 ### Limitations connues
 
 1. **Ordre des éléments** : Les réductions sont appliquées au produit précédent. Pour de meilleurs résultats, placez les réductions juste après le produit concerné.
-2. **Format texte uniquement** : Actuellement, seul le format texte est supporté (pas de PDF ni d'images directement).
-3. **Parsing simple** : Le parser utilise des expressions régulières simples. Les formats de reçus très complexes peuvent nécessiter une adaptation.
+2. **Parsing simple** : Le parser utilise des expressions régulières simples. Les formats de reçus très complexes peuvent nécessiter une adaptation.
+3. **PDF** : L'extraction de texte depuis les PDF dépend de la qualité du PDF. Les PDF scannés (images) ne sont pas supportés - utilisez un outil OCR pour les convertir en texte d'abord.
 
 ### Bonnes pratiques
 
@@ -159,14 +164,14 @@ python -m unittest tests/test_receipt_csv.py -v
 ## Exemples de reçus
 
 Le répertoire `examples/` contient plusieurs exemples de reçus :
-- `receipt1.txt` : Reçu simple avec un moyen de paiement
-- `receipt2.txt` : Reçu avec plusieurs moyens de paiement
-- `receipt3.txt` : Reçu avec réductions multiples
+- `receipt1.txt` / `receipt1.pdf` : Reçu simple avec un moyen de paiement
+- `receipt2.txt` / `receipt2.pdf` : Reçu avec plusieurs moyens de paiement
+- `receipt3.txt` / `receipt3.pdf` : Reçu avec réductions multiples
 
 ## Développement futur
 
-- [ ] Support pour les fichiers PDF
-- [ ] Support pour l'OCR d'images
+- [x] Support pour les fichiers PDF
+- [ ] Support pour l'OCR d'images (PDF scannés)
 - [ ] Interface web
 - [ ] API REST
 - [ ] Support pour plus de formats de reçus
