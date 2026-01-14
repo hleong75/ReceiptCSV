@@ -118,13 +118,14 @@ class CSVGenerator:
     def _create_row(self, receipt: Receipt, product: Product, payment_method: str) -> List[str]:
         """Create a CSV row for a product"""
         # Calculate total price after discount
-        prix_total = product.subtotal - product.discount_amount
+        discount_amount = product.discount_amount or 0
+        prix_total = product.subtotal - discount_amount
         
         return [
             receipt.date,
             product.name,
             self._format_number(product.subtotal),
-            self._format_number(product.discount_amount) if product.discount_amount > 0 else "",
+            self._format_number(discount_amount) if discount_amount > 0 else "",
             self._format_number(prix_total),
             payment_method,
             receipt.currency
