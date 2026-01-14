@@ -99,8 +99,15 @@ class ReceiptParser:
                 # For now, treat standalone discounts as global
                 if receipt.products and not self._is_global_discount(line):
                     # Apply to last product
-                    receipt.products[-1].discount_type = discount_type
-                    receipt.products[-1].discount_amount = amount
+                    last_product = receipt.products[-1]
+                    if last_product.discount_amount > 0:
+                        # Already has a discount - combine them
+                        last_product.discount_amount += amount
+                        last_product.discount_type = f"{last_product.discount_type}, {discount_type}"
+                    else:
+                        # First discount for this product
+                        last_product.discount_type = discount_type
+                        last_product.discount_amount = amount
                 else:
                     receipt.global_discounts.append((discount_type, amount))
                 i += 1
