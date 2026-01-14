@@ -4,6 +4,12 @@ Receipt Parser - Extract structured data from receipts
 import re
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
+try:
+    from ai_processor import AIProcessor
+    AI_AVAILABLE = True
+except ImportError:
+    AI_AVAILABLE = False
+    AIProcessor = None
 
 
 @dataclass
@@ -44,7 +50,21 @@ class Receipt:
 class ReceiptParser:
     """Parse receipts from text format"""
     
-    def parse(self, text: str) -> Receipt:
+    def __init__(self, use_ai: bool = True, ai_api_key: Optional[str] = None):
+        """
+        Initialize receipt parser
+        
+        Args:
+            use_ai: Enable AI-powered enhancement (default: True if API key available)
+            ai_api_key: OpenAI API key for AI processing (optional, uses env var if not provided)
+        """
+        self.ai_processor = None
+        if use_ai and AI_AVAILABLE:
+            self.ai_processor = AIProcessor(api_key=ai_api_key)
+            if not self.ai_processor.is_enabled():
+                self.ai_processor = None
+    
+    def parse(self, text: str, use_ai_fallback: bool = True) -> Receipt:
         """
         Parse receipt text and extract structured data
         
@@ -54,8 +74,22 @@ class ReceiptParser:
         - Products (name, quantity, price)
         - Discounts
         - Payment methods
+        
+        Args:
+            text: Receipt text to parse
+            use_ai_fallback: Use AI to extract data if enabled (default: True)
         """
         receipt = Receipt()
+        
+        # Try AI extraction first if enabled
+        if use_ai_fallback and self.ai_processor:
+            ai_data = self.ai_processor.extract_receipt_data(text)
+            if ai_data and ai_data.confidence > 0.5:
+                # Use AI-extracted data
+                receipt = self._convert_ai_to_receipt(ai_data)
+                return receipt
+        
+        # Fallback to traditional parsing
         lines = text.strip().split('\n')
         
         # Parse line by line
@@ -161,6 +195,12 @@ class ReceiptParser:
     
     def _extract_product(self, line: str) -> Optional[Product]:
         """Extract product from line"""
+        # Try AI-enhanced extraction first if available
+        if self.ai_processor:
+            # For now, we'll use traditional parsing
+            # AI enhancement can be added for specific edge cases
+            pass
+        
         # Pattern: Product name [quantity x] unit_price [subtotal]
         # Examples:
         # "Product A    1 x 10.00    10.00"
@@ -264,12 +304,18 @@ class ReceiptParser:
         # Amount should always be positive (absolute value)
         amount = abs(amount)
         
-        # Determine discount type
+        # Determine discount type - use AI if available for better categorization
         discount_type = "Réduction"
-        for keyword in discount_keywords:
-            if keyword in line.lower():
-                discount_type = keyword.capitalize()
-                break
+        if self.ai_processor:
+            ai_type = self.ai_processor.identify_discount_type(line)
+            if ai_type:
+                discount_type = ai_type
+        else:
+            # Traditional keyword matching
+            for keyword in discount_keywords:
+                if keyword in line.lower():
+                    discount_type = keyword.capitalize()
+                    break
         
         return discount_type, amount
     
@@ -278,3 +324,51 @@ class ReceiptParser:
         # Global discounts usually contain words like "total", "order", "facture"
         global_keywords = ['total', 'order', 'facture', 'commande']
         return any(keyword in line.lower() for keyword in global_keywords)
+    
+    def _convert_ai_to_receipt(self, ai_data) -> Receipt:
+        """
+        Convert AI-extracted data to Receipt object
+        
+        Args:
+            ai_data: AIExtractedData object from AI processor
+            
+        Returns:
+            Receipt object
+        """
+        receipt = Receipt(
+            date=ai_data.date,
+            merchant=ai_data.merchant,
+            currency="EUR"  # Default, could be enhanced to detect from AI data
+        )
+        
+        # Convert products
+        for prod_dict in ai_data.products:
+            product = Product(
+                name=prod_dict.get('name', ''),
+                quantity=float(prod_dict.get('quantity', 1.0)),
+                unit_price=float(prod_dict.get('unit_price', 0.0)),
+                subtotal=float(prod_dict.get('subtotal', 0.0))
+            )
+            receipt.products.append(product)
+        
+        # Convert discounts
+        for disc_dict in ai_data.discounts:
+            discount_type = disc_dict.get('type', 'Discount')
+            amount = float(disc_dict.get('amount', 0.0))
+            product_index = disc_dict.get('product_index', None)
+            
+            if product_index is not None and 0 <= product_index < len(receipt.products):
+                # Product-specific discount
+                receipt.products[product_index].discount_type = discount_type
+                receipt.products[product_index].discount_amount = amount
+            else:
+                # Global discount
+                receipt.global_discounts.append((discount_type, amount))
+        
+        # Convert payment methods
+        for pay_dict in ai_data.payments:
+            method = pay_dict.get('method', '')
+            amount = float(pay_dict.get('amount', 0.0))
+            receipt.payment_methods.append((method, amount))
+        
+        return receipt

@@ -16,6 +16,9 @@ ReceiptCSV extrait les données structurées des reçus (texte, PDF ou OCR) et g
 - ✅ Format CSV avec séparateur point-virgule (;)
 - ✅ Format de date YYYY-MM-DD
 - ✅ Montants numériques avec point (.) comme séparateur décimal
+- ✅ **NOUVEAU** : Traitement intelligent avec IA pour l'analyse post-OCR
+- ✅ **NOUVEAU** : Identification intelligente des types de réduction
+- ✅ **NOUVEAU** : Extraction robuste des prix même avec du bruit OCR
 
 ## Colonnes du CSV
 
@@ -37,8 +40,30 @@ ReceiptCSV extrait les données structurées des reçus (texte, PDF ou OCR) et g
 git clone https://github.com/hleong75/ReceiptCSV.git
 cd ReceiptCSV
 
+# Installation de base (parsing traditionnel uniquement)
 # Aucune dépendance externe requise (Python 3.6+)
+
+# Installation avec support IA (recommandé pour OCR)
+pip install -r requirements.txt
 ```
+
+### Configuration de l'IA (optionnel)
+
+Pour bénéficier du traitement intelligent post-OCR :
+
+1. Obtenir une clé API OpenAI sur https://platform.openai.com/
+2. Définir la clé API :
+
+```bash
+# Option 1: Variable d'environnement (recommandé)
+export OPENAI_API_KEY='votre-clé-api'
+
+# Option 2: Dans le code Python
+from receipt_parser import ReceiptParser
+parser = ReceiptParser(use_ai=True, ai_api_key='votre-clé-api')
+```
+
+**Note** : Sans clé API, le système fonctionne normalement avec le parsing traditionnel.
 
 ## Utilisation
 
@@ -68,7 +93,7 @@ from csv_generator import CSVGenerator
 with open('receipt.txt', 'r') as f:
     receipt_text = f.read()
 
-# Parser et générer le CSV
+# Parser et générer le CSV (avec IA activée par défaut si clé API disponible)
 parser = ReceiptParser()
 generator = CSVGenerator()
 
@@ -77,6 +102,26 @@ csv_output = generator.generate(receipt)
 
 # Sauvegarder ou afficher
 print(csv_output)
+```
+
+#### Utilisation avancée avec IA
+
+```python
+from receipt_parser import ReceiptParser
+from csv_generator import CSVGenerator
+
+# Parser avec IA explicitement activée
+parser = ReceiptParser(use_ai=True, ai_api_key='votre-clé')
+
+# Pour du texte OCR bruité
+receipt_text = """
+2O24-O3-15  # O au lieu de 0 (erreur OCR)
+App St0re   # 0 au lieu de o
+Applicati0n A    l x 9.99    9.99  # l au lieu de 1
+"""
+
+receipt = parser.parse(receipt_text)
+# L'IA aidera à corriger les erreurs OCR et extraire les bonnes données
 ```
 
 ### Format des reçus
@@ -124,7 +169,29 @@ Date d'achat;Nom de l'application / marchand;Nom du produit;Quantité;Prix unita
 
 1. **Ordre des éléments** : Les réductions sont appliquées au produit précédent. Pour de meilleurs résultats, placez les réductions juste après le produit concerné.
 2. **Format texte uniquement** : Actuellement, seul le format texte est supporté (pas de PDF ni d'images directement).
-3. **Parsing simple** : Le parser utilise des expressions régulières simples. Les formats de reçus très complexes peuvent nécessiter une adaptation.
+3. **Parsing simple** : Le parser traditionnel utilise des expressions régulières simples. Pour les formats complexes ou OCR bruité, utilisez le mode IA.
+
+### Traitement intelligent avec IA
+
+L'IA améliore considérablement le traitement des reçus issus d'OCR :
+
+**Avantages :**
+- ✅ Correction automatique des erreurs OCR courantes (0/O, 1/l, 5/S, etc.)
+- ✅ Identification intelligente des types de réduction (Coupon, Promo, Fidélité, etc.)
+- ✅ Extraction robuste même avec mise en page complexe
+- ✅ Reconnaissance contextuelle des produits et prix
+- ✅ Meilleure gestion des formats de reçus variés
+
+**Comment ça marche :**
+1. Si une clé API OpenAI est configurée, l'IA est utilisée en premier
+2. Si l'IA échoue ou n'est pas disponible, le système bascule automatiquement sur le parsing traditionnel
+3. Aucune interruption de service : le système fonctionne toujours
+
+**Cas d'usage :**
+- Reçus scannés avec du bruit ou des artefacts
+- Texte OCR avec des erreurs de reconnaissance
+- Formats de reçus non standard
+- Identification précise des types de promotions
 
 ### Bonnes pratiques
 
@@ -149,11 +216,14 @@ Date d'achat;Nom de l'application / marchand;Nom du produit;Quantité;Prix unita
 ## Tests
 
 ```bash
-# Exécuter les tests
-python -m unittest tests/test_receipt_csv.py
+# Exécuter tous les tests
+python -m unittest discover tests -v
 
-# Exécuter les tests avec verbosité
+# Exécuter les tests de parsing traditionnel
 python -m unittest tests/test_receipt_csv.py -v
+
+# Exécuter les tests d'IA
+python -m unittest tests/test_ai_processor.py -v
 ```
 
 ## Exemples de reçus
@@ -162,14 +232,18 @@ Le répertoire `examples/` contient plusieurs exemples de reçus :
 - `receipt1.txt` : Reçu simple avec un moyen de paiement
 - `receipt2.txt` : Reçu avec plusieurs moyens de paiement
 - `receipt3.txt` : Reçu avec réductions multiples
+- `receipt_complex.txt` : Reçu complexe avec plusieurs réductions et paiements
 
 ## Développement futur
 
+- [x] Support pour l'IA et traitement post-OCR intelligent
+- [x] Identification intelligente des types de réduction
 - [ ] Support pour les fichiers PDF
-- [ ] Support pour l'OCR d'images
+- [ ] Support pour l'OCR d'images (Tesseract)
 - [ ] Interface web
 - [ ] API REST
 - [ ] Support pour plus de formats de reçus
+- [ ] Support pour plus de modèles d'IA (modèles locaux, Anthropic, etc.)
 
 ## Licence
 

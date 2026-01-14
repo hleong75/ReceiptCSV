@@ -1,6 +1,10 @@
 # No external dependencies required for basic functionality
 # Python standard library only
 
+# Optional: AI-powered enhancement for OCR post-processing
+# Install with: pip install -r requirements.txt
+openai>=1.0.0
+
 # Optional dependencies for PDF support (not yet implemented)
 # pypdf2>=3.0.0
 # pytesseract>=0.3.10
