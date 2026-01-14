@@ -20,15 +20,14 @@ ReceiptCSV extrait les données structurées des reçus (texte, PDF ou OCR) et g
 ## Colonnes du CSV
 
 1. Date d'achat
-2. Nom de l'application / marchand
-3. Nom du produit
-4. Quantité
-5. Prix unitaire
-6. Sous-total produit
-7. Type de réduction
-8. Montant de la réduction
-9. Moyen de paiement
-10. Devise
+2. Nom du produit
+3. Quantité
+4. Prix unitaire
+5. Sous-total produit
+6. Type de réduction
+7. Montant de la réduction
+8. Moyen de paiement
+9. Devise
 
 ## Installation
 
@@ -106,9 +105,9 @@ Paiement: Apple Pay    10.98
 
 **Sortie CSV:**
 ```csv
-Date d'achat;Nom de l'application / marchand;Nom du produit;Quantité;Prix unitaire;Sous-total produit;Type de réduction;Montant de la réduction;Moyen de paiement;Devise
-2024-03-15;App Store;Application A;1;9.99;9.99;Coupon;2.00;Apple Pay;EUR
-2024-03-15;App Store;Application B;1;2.99;2.99;;;Apple Pay;EUR
+Date d'achat;Nom du produit;Quantité;Prix unitaire;Sous-total produit;Type de réduction;Montant de la réduction;Moyen de paiement;Devise
+2024-03-15;Application A;1;9.99;9.99;Coupon;2.00;Apple Pay;EUR
+2024-03-15;Application B;1;2.99;2.99;;;Apple Pay;EUR
 ```
 
 ## Règles de traitement

@@ -12,7 +12,6 @@ class CSVGenerator:
     
     COLUMNS = [
         "Date d'achat",
-        "Nom de l'application / marchand",
         "Nom du produit",
         "Quantité",
         "Prix unitaire",
@@ -122,7 +121,6 @@ class CSVGenerator:
         """Create a CSV row for a product"""
         return [
             receipt.date,
-            receipt.merchant,
             product.name,
             self._format_number(product.quantity),
             self._format_number(product.unit_price),

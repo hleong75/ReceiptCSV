@@ -139,7 +139,6 @@ Paiement: Apple Pay    12.98
         
         # Verify data row exists
         self.assertIn("2024-03-15", lines[1])
-        self.assertIn("App Store", lines[1])
 
 
 if __name__ == '__main__':
