@@ -1,0 +1,6 @@
+2024-03-15
+App Store
+Application A    1 x 9.99    9.99
+Application B    2.99
+Coupon App A    -2.00
+Paiement: Apple Pay    10.98
