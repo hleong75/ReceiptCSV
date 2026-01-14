@@ -145,6 +145,11 @@ Paiement: Apple Pay    12.98
 class TestPDFExtraction(unittest.TestCase):
     """Test PDF extraction functionality"""
     
+    def setUp(self):
+        """Set up test fixtures"""
+        from pdf_extractor import PDFExtractor
+        self.extractor = PDFExtractor()
+    
     def test_pdf_text_extraction(self):
         """Test extracting text from PDF"""
         from pathlib import Path
@@ -154,9 +159,7 @@ class TestPDFExtraction(unittest.TestCase):
         if not pdf_path.exists():
             self.skipTest("Test PDF file not found")
         
-        from pdf_extractor import PDFExtractor
-        extractor = PDFExtractor()
-        text = extractor.extract_text(pdf_path)
+        text = self.extractor.extract_text(pdf_path)
         
         # Verify extracted text contains expected content
         self.assertIn("2024-03-15", text)
@@ -173,13 +176,11 @@ class TestPDFExtraction(unittest.TestCase):
         if not pdf_path.exists():
             self.skipTest("Test PDF file not found")
         
-        from pdf_extractor import PDFExtractor
         from receipt_parser import ReceiptParser
         from csv_generator import CSVGenerator
         
         # Extract text from PDF
-        extractor = PDFExtractor()
-        text = extractor.extract_text(pdf_path)
+        text = self.extractor.extract_text(pdf_path)
         
         # Parse and generate CSV
         parser = ReceiptParser()

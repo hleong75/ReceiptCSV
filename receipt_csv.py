@@ -7,7 +7,6 @@ import argparse
 from pathlib import Path
 from receipt_parser import ReceiptParser
 from csv_generator import CSVGenerator
-from pdf_extractor import PDFExtractor
 
 
 def process_receipt(text: str) -> str:
@@ -56,6 +55,7 @@ def main():
         # Check if input is PDF
         if input_path.suffix.lower() == '.pdf':
             try:
+                from pdf_extractor import PDFExtractor
                 pdf_extractor = PDFExtractor()
                 text = pdf_extractor.extract_text(input_path)
             except ImportError as e:
