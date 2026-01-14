@@ -58,14 +58,6 @@ python receipt_csv.py examples/receipt1.txt -o output.csv
 python receipt_csv.py --help
 ```
 
-### Démonstration interactive
-
-Pour voir des exemples détaillés avec explications :
-
-```bash
-python demo.py
-```
-
 ### En tant que module Python
 
 ```python
