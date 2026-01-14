@@ -135,8 +135,10 @@ class CSVGenerator:
     
     def _format_number(self, value: float) -> str:
         """Format number with . as decimal separator"""
+        # Empty fields should be left blank per requirements
+        # But zero is a valid value and should be shown
         if value == 0:
-            return ""
+            return "0"
         # Format with 2 decimal places
         formatted = f"{value:.2f}"
         # Remove trailing zeros, but keep at least one decimal place if not a whole number

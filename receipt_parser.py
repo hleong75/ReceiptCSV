@@ -194,7 +194,14 @@ class ReceiptParser:
             subtotal = price_values[-1]
         elif len(price_values) == 1:
             subtotal = price_values[0]
-            unit_price = subtotal / quantity if quantity > 0 else subtotal
+            # Calculate unit price from subtotal and quantity
+            # If quantity is 0 or invalid, use subtotal as unit price
+            if quantity > 0:
+                unit_price = subtotal / quantity
+            else:
+                # Edge case: quantity is 0, treat it as 1
+                unit_price = subtotal
+                quantity = 1.0
         else:
             return None
         
