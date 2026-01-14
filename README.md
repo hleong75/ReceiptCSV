@@ -55,10 +55,14 @@ Pour bénéficier du traitement intelligent post-OCR :
 2. Définir la clé API :
 
 ```bash
-# Option 1: Variable d'environnement (recommandé)
+# Option 1: Fichier .env (recommandé)
+cp .env.example .env
+# Éditer .env et ajouter votre clé API
+
+# Option 2: Variable d'environnement
 export OPENAI_API_KEY='votre-clé-api'
 
-# Option 2: Dans le code Python
+# Option 3: Dans le code Python
 from receipt_parser import ReceiptParser
 parser = ReceiptParser(use_ai=True, ai_api_key='votre-clé-api')
 ```
