@@ -53,6 +53,38 @@ cat examples/receipt1.txt | python receipt_csv.py
 
 # Sauvegarder dans un fichier
 python receipt_csv.py examples/receipt1.txt -o output.csv
+
+# Afficher l'aide
+python receipt_csv.py --help
+```
+
+### Démonstration interactive
+
+Pour voir des exemples détaillés avec explications :
+
+```bash
+python demo.py
+```
+
+### En tant que module Python
+
+```python
+from receipt_parser import ReceiptParser
+from csv_generator import CSVGenerator
+
+# Charger le reçu
+with open('receipt.txt', 'r') as f:
+    receipt_text = f.read()
+
+# Parser et générer le CSV
+parser = ReceiptParser()
+generator = CSVGenerator()
+
+receipt = parser.parse(receipt_text)
+csv_output = generator.generate(receipt)
+
+# Sauvegarder ou afficher
+print(csv_output)
 ```
 
 ### Format des reçus
@@ -93,6 +125,34 @@ Date d'achat;Nom de l'application / marchand;Nom du produit;Quantité;Prix unita
 - **Plusieurs moyens de paiement** : Si plusieurs moyens de paiement sont utilisés, le montant est réparti proportionnellement entre les produits
 - **Réductions globales** : Les réductions non liées à un produit spécifique sont réparties proportionnellement
 - **Champs vides** : Les champs sans valeur sont laissés vides dans le CSV
+
+## Limitations et bonnes pratiques
+
+### Limitations connues
+
+1. **Ordre des éléments** : Les réductions sont appliquées au produit précédent. Pour de meilleurs résultats, placez les réductions juste après le produit concerné.
+2. **Format texte uniquement** : Actuellement, seul le format texte est supporté (pas de PDF ni d'images directement).
+3. **Parsing simple** : Le parser utilise des expressions régulières simples. Les formats de reçus très complexes peuvent nécessiter une adaptation.
+
+### Bonnes pratiques
+
+1. **Structure du reçu** : Pour de meilleurs résultats, formatez vos reçus comme suit :
+   ```
+   Date (YYYY-MM-DD ou DD/MM/YYYY)
+   Nom du marchand
+   Produit 1    Quantité x Prix    Total
+   Réduction produit 1    Montant
+   Produit 2    Prix
+   Réduction globale    Montant
+   Paiement: Méthode 1    Montant
+   Paiement: Méthode 2    Montant
+   ```
+
+2. **Réductions** : Placez les réductions immédiatement après le produit auquel elles s'appliquent.
+
+3. **Montants** : Utilisez toujours le format avec 2 décimales (ex: 9.99 ou 9,99).
+
+4. **Moyens de paiement** : Incluez le mot "Paiement" ou "Payment" pour une meilleure détection.
 
 ## Tests
 
