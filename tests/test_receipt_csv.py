@@ -142,5 +142,58 @@ Paiement: Apple Pay    12.98
         self.assertIn("App Store", lines[1])
 
 
+class TestPDFExtraction(unittest.TestCase):
+    """Test PDF extraction functionality"""
+    
+    def test_pdf_text_extraction(self):
+        """Test extracting text from PDF"""
+        from pathlib import Path
+        pdf_path = Path(__file__).parent.parent / "examples" / "receipt1.pdf"
+        
+        # Skip test if PDF doesn't exist
+        if not pdf_path.exists():
+            self.skipTest("Test PDF file not found")
+        
+        from pdf_extractor import PDFExtractor
+        extractor = PDFExtractor()
+        text = extractor.extract_text(pdf_path)
+        
+        # Verify extracted text contains expected content
+        self.assertIn("2024-03-15", text)
+        self.assertIn("App Store", text)
+        self.assertIn("Application A", text)
+        self.assertIn("Apple Pay", text)
+    
+    def test_pdf_processing_integration(self):
+        """Test full PDF processing from file to CSV"""
+        from pathlib import Path
+        pdf_path = Path(__file__).parent.parent / "examples" / "receipt1.pdf"
+        
+        # Skip test if PDF doesn't exist
+        if not pdf_path.exists():
+            self.skipTest("Test PDF file not found")
+        
+        from pdf_extractor import PDFExtractor
+        from receipt_parser import ReceiptParser
+        from csv_generator import CSVGenerator
+        
+        # Extract text from PDF
+        extractor = PDFExtractor()
+        text = extractor.extract_text(pdf_path)
+        
+        # Parse and generate CSV
+        parser = ReceiptParser()
+        generator = CSVGenerator()
+        receipt = parser.parse(text)
+        csv_output = generator.generate(receipt)
+        
+        # Verify CSV output
+        lines = csv_output.strip().split('\n')
+        self.assertTrue(len(lines) >= 2)
+        self.assertIn("Date d'achat", lines[0])
+        self.assertIn("2024-03-15", lines[1])
+        self.assertIn("App Store", lines[1])
+
+
 if __name__ == '__main__':
     unittest.main()
